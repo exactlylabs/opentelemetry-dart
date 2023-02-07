@@ -12,10 +12,12 @@ import '../../../api.dart' as api;
 abstract class Tracer {
   /// Starts a new [api.Span] without setting it as the current span in this
   /// tracer's context.
-  api.Span startSpan(String name,
-      {api.Context context,
-      api.SpanKind kind,
-      List<api.Attribute> attributes,
-      List<api.SpanLink> links,
-      Int64 startTime});
+  api.Span startSpan(
+    String name, {
+    api.Context? context,
+    api.SpanKind? kind,
+    List<api.Attribute>? attributes,
+    List<api.SpanLink>? links,
+    Int64? startTime,
+  });
 }

@@ -9,9 +9,8 @@ class MeterSharedState {
   final MeterProviderSharedState _meterProviderSharedState;
   // ignore: unused_field
   final InstrumentationScope _instrumentationScope;
-  sdk.Meter meter;
 
-  MeterSharedState(this._meterProviderSharedState, this._instrumentationScope) {
-    meter = sdk.Meter(this);
-  }
+  final sdk.Meter meter;
+
+  MeterSharedState(this._meterProviderSharedState, this._instrumentationScope) : meter = sdk.Meter();
 }

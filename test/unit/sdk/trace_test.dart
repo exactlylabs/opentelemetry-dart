@@ -19,13 +19,12 @@ void main() {
 
   test('traceSync wants you to use trace instead', () {
     expect(() => traceSync('foo', () async => ''), throwsArgumentError);
-    expect(() => traceSync('foo', () => Future.value()), throwsArgumentError);
+    expect(() => traceSync('foo', Future.value), throwsArgumentError);
   });
 
   test('trace returns future value', () async {
     await expectLater(trace('foo', () async => 'bar'), completion('bar'));
-    await expectLater(
-        trace('foo', () => Future.value('bazz')), completion('bazz'));
+    await expectLater(trace('foo', () => Future.value('bazz')), completion('bazz'));
   });
 
   test('trace throws future error', () async {
@@ -35,8 +34,7 @@ void main() {
 
     // Exception thrown from asynchronous code in async function.
     final buzz = Exception('buzz!!');
-    await expectLater(
-        trace('foo', () async => Future.error(buzz)), throwsA(buzz));
+    await expectLater(trace('foo', () async => Future.error(buzz)), throwsA(buzz));
 
     // Exception thrown from asynchronous code in async function.
     final bazz = Exception('bazz!!');

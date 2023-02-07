@@ -17,18 +17,25 @@ class Tracer implements api.Tracer {
   final api.InstrumentationLibrary _instrumentationLibrary;
   final sdk.SpanLimits _spanLimits;
 
-  Tracer(this._processors, this._resource, this._sampler, this._timeProvider,
-      this._idGenerator, this._instrumentationLibrary,
-      {sdk.SpanLimits spanLimits})
-      : _spanLimits = spanLimits ?? sdk.SpanLimits();
+  Tracer(
+    this._processors,
+    this._resource,
+    this._sampler,
+    this._timeProvider,
+    this._idGenerator,
+    this._instrumentationLibrary, {
+    sdk.SpanLimits? spanLimits,
+  }) : _spanLimits = spanLimits ?? sdk.SpanLimits();
 
   @override
-  api.Span startSpan(String name,
-      {api.Context context,
-      api.SpanKind kind,
-      List<api.Attribute> attributes,
-      List<api.SpanLink> links,
-      Int64 startTime}) {
+  api.Span startSpan(
+    String name, {
+    api.Context? context,
+    api.SpanKind? kind,
+    List<api.Attribute>? attributes,
+    List<api.SpanLink>? links,
+    Int64? startTime,
+  }) {
     context ??= api.Context.current;
 
     // If a valid, active Span is present in the context, use it as this Span's
@@ -51,21 +58,25 @@ class Tracer implements api.Tracer {
       traceState = sdk.TraceState.empty();
     }
 
-    final samplerResult =
-        _sampler.shouldSample(context, traceId, name, kind, attributes, links);
-    final traceFlags = (samplerResult.decision == sdk.Decision.recordAndSample)
-        ? api.TraceFlags.sampled
-        : api.TraceFlags.none;
-    final spanContext =
-        sdk.SpanContext(traceId, spanId, traceFlags, traceState);
+    final samplerResult = _sampler.shouldSample(context, traceId, name, kind, attributes, links);
+    final traceFlags =
+        (samplerResult.decision == sdk.Decision.recordAndSample) ? api.TraceFlags.sampled : api.TraceFlags.none;
+    final spanContext = sdk.SpanContext(traceId, spanId, traceFlags, traceState);
 
-    return Span(name, spanContext, parentSpanId, _processors, _timeProvider,
-        _resource, _instrumentationLibrary,
-        kind: kind,
-        attributes: attributes,
-        links: links,
-        parentContext: context,
-        limits: _spanLimits,
-        startTime: startTime);
+    return Span(
+      name,
+      spanContext,
+      parentSpanId,
+      _processors,
+      _timeProvider,
+      _resource,
+      _instrumentationLibrary,
+      kind: kind,
+      attributes: attributes,
+      links: links,
+      parentContext: context,
+      limits: _spanLimits,
+      startTime: startTime,
+    );
   }
 }

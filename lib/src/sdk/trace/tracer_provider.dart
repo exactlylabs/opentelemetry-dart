@@ -14,13 +14,13 @@ class TracerProviderBase implements api.TracerProvider {
   final api.IdGenerator _idGenerator;
   final sdk.SpanLimits _spanLimits;
 
-  TracerProviderBase(
-      {List<api.SpanProcessor> processors,
-      sdk.Resource resource,
-      sdk.Sampler sampler,
-      api.IdGenerator idGenerator,
-      sdk.SpanLimits spanLimits})
-      : _processors = processors ?? [], // Default to a no-op TracerProvider.
+  TracerProviderBase({
+    List<api.SpanProcessor>? processors,
+    sdk.Resource? resource,
+    sdk.Sampler? sampler,
+    api.IdGenerator? idGenerator,
+    sdk.SpanLimits? spanLimits,
+  })  : _processors = processors ?? [], // Default to a no-op TracerProvider.
         _resource = resource ?? sdk.Resource([]),
         _sampler = sampler ?? sdk.ParentBasedSampler(sdk.AlwaysOnSampler()),
         _idGenerator = idGenerator ?? sdk.IdGenerator(),
@@ -33,12 +33,7 @@ class TracerProviderBase implements api.TracerProvider {
     final key = '$name@$version';
     return _tracers.putIfAbsent(
         key,
-        () => Tracer(
-            _processors,
-            _resource,
-            _sampler,
-            sdk.DateTimeTimeProvider(),
-            _idGenerator,
+        () => Tracer(_processors, _resource, _sampler, sdk.DateTimeTimeProvider(), _idGenerator,
             sdk.InstrumentationLibrary(name, version),
             spanLimits: _spanLimits));
   }

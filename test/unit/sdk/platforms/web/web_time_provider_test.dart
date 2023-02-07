@@ -12,8 +12,7 @@ void main() {
   test('records start and end times with browser performance API', () async {
     final span = Span(
         'testStartAndEndTimes',
-        sdk.SpanContext(api.TraceId([1, 2, 3]), api.SpanId([7, 8, 9]),
-            api.TraceFlags.none, sdk.TraceState.empty()),
+        sdk.SpanContext(api.TraceId([1, 2, 3]), api.SpanId([7, 8, 9]), api.TraceFlags.none, sdk.TraceState.empty()),
         api.SpanId([4, 5, 6]),
         [],
         WebTimeProvider(),
@@ -21,6 +20,7 @@ void main() {
         sdk.InstrumentationLibrary('library_name', 'library_version'))
       ..end();
 
-    expect(span.startTime, lessThanOrEqualTo(span.endTime));
+    expect(span.endTime, isNotNull);
+    expect(span.startTime, lessThanOrEqualTo(span.endTime!));
   });
 }

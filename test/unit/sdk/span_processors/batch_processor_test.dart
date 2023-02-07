@@ -11,9 +11,9 @@ import 'package:test/test.dart';
 import '../../mocks.dart';
 
 void main() {
-  BatchSpanProcessor processor;
-  SpanExporter mockExporter;
-  Span mockSpan1, mockSpan2, mockSpan3;
+  late BatchSpanProcessor processor;
+  late SpanExporter mockExporter;
+  late Span mockSpan1, mockSpan2, mockSpan3;
 
   setUp(() {
     mockSpan1 = MockSpan();
@@ -21,8 +21,7 @@ void main() {
     mockSpan3 = MockSpan();
 
     mockExporter = MockSpanExporter();
-    processor = BatchSpanProcessor(mockExporter,
-        maxExportBatchSize: 2, scheduledDelayMillis: 100);
+    processor = BatchSpanProcessor(mockExporter, maxExportBatchSize: 2, scheduledDelayMillis: 100);
   });
 
   tearDown(() {

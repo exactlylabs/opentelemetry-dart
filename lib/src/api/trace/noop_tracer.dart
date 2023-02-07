@@ -10,15 +10,17 @@ import '../../../sdk.dart' as sdk;
 /// operations.
 class NoopTracer implements api.Tracer {
   @override
-  api.Span startSpan(String name,
-      {api.Context context,
-      api.SpanKind kind,
-      List<api.Attribute> attributes,
-      List<api.SpanLink> links,
-      Int64 startTime}) {
-    final parentContext = context.spanContext;
-
-    return api.NonRecordingSpan(
-        (parentContext.isValid) ? parentContext : sdk.SpanContext.invalid());
+  api.Span startSpan(
+    String name, {
+    api.Context? context,
+    api.SpanKind? kind,
+    List<api.Attribute>? attributes,
+    List<api.SpanLink>? links,
+    Int64? startTime,
+  }) {
+    if (context?.spanContext == null || !context!.spanContext!.isValid) {
+      return api.NonRecordingSpan(sdk.SpanContext.invalid());
+    }
+    return api.NonRecordingSpan(context.spanContext!);
   }
 }

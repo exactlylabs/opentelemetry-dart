@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. Please see https://github.com/Workiva/opentelemetry-dart/blob/master/LICENSE for more information
 
 import 'package:fixnum/fixnum.dart';
+import 'package:opentelemetry/src/api/trace/span_status.dart';
 
 import '../../../api.dart' as api;
 import '../../../sdk.dart' as sdk;
@@ -12,7 +13,6 @@ class Span implements api.Span {
   final api.SpanContext _spanContext;
   final api.SpanId _parentSpanId;
   final api.SpanKind _kind;
-  final api.SpanStatus _status = api.SpanStatus();
   final List<api.SpanProcessor> _processors;
   final List<api.SpanLink> _links;
   final sdk.TimeProvider _timeProvider;
@@ -21,7 +21,8 @@ class Span implements api.Span {
   final api.InstrumentationLibrary _instrumentationLibrary;
   final Int64 _startTime;
   final Attributes _attributes = Attributes.empty();
-  Int64 _endTime;
+  Int64? _endTime;
+  api.SpanStatus _status = api.SpanStatus();
   int _droppedSpanAttributes = 0;
 
   @override
@@ -31,15 +32,21 @@ class Span implements api.Span {
   bool get isRecording => _endTime == null;
 
   /// Construct a [Span].
-  Span(this.name, this._spanContext, this._parentSpanId, this._processors,
-      this._timeProvider, this._resource, this._instrumentationLibrary,
-      {api.SpanKind kind,
-      List<api.Attribute> attributes,
-      List<api.SpanLink> links,
-      api.Context parentContext,
-      sdk.SpanLimits limits,
-      Int64 startTime})
-      : _links = _applyLinkLimits(links, limits ?? sdk.SpanLimits()),
+  Span(
+    this.name,
+    this._spanContext,
+    this._parentSpanId,
+    this._processors,
+    this._timeProvider,
+    this._resource,
+    this._instrumentationLibrary, {
+    api.SpanKind? kind,
+    List<api.Attribute>? attributes,
+    List<api.SpanLink>? links,
+    api.Context? parentContext,
+    sdk.SpanLimits? limits,
+    Int64? startTime,
+  })  : _links = _applyLinkLimits(links, limits ?? sdk.SpanLimits()),
         _kind = kind ?? api.SpanKind.internal,
         _startTime = startTime ?? _timeProvider.now,
         _limits = limits ?? sdk.SpanLimits() {
@@ -56,7 +63,7 @@ class Span implements api.Span {
   api.SpanContext get spanContext => _spanContext;
 
   @override
-  Int64 get endTime => _endTime;
+  Int64? get endTime => _endTime;
 
   @override
   Int64 get startTime => _startTime;
@@ -74,19 +81,20 @@ class Span implements api.Span {
   }
 
   @override
-  void setStatus(api.StatusCode status, {String description}) {
+  void setStatus(api.StatusCode code, String? description) {
     // A status cannot be Unset after being set, and cannot be set to any other
     // status after being marked "Ok".
-    if (status == api.StatusCode.unset || _status.code == api.StatusCode.ok) {
+    if (code == api.StatusCode.unset || _status.code == api.StatusCode.ok) {
       return;
     }
 
-    _status.code = status;
-
     // Description is ignored for statuses other than "Error".
-    if (status == api.StatusCode.error && description != null) {
-      _status.description = description;
+    if (code == api.StatusCode.error && description != null) {
+      _status = SpanStatus(code, description);
+      return;
     }
+
+    _status = SpanStatus(code, _status.description);
   }
 
   @override
@@ -95,8 +103,7 @@ class Span implements api.Span {
   sdk.Resource get resource => _resource;
 
   @override
-  api.InstrumentationLibrary get instrumentationLibrary =>
-      _instrumentationLibrary;
+  api.InstrumentationLibrary get instrumentationLibrary => _instrumentationLibrary;
 
   @override
   void setAttributes(List<api.Attribute> attributes) {
@@ -117,15 +124,14 @@ class Span implements api.Span {
       return;
     }
 
-    final obj = _attributes.get(attribute.key);
+    final isKeyInCurrentMap = _attributes.containsKey(attribute.key);
     // If current attributes.length is equal or greater than maxNumAttributes and
     // key is not in current map, drop it.
-    if (_attributes.length >= _limits.maxNumAttributes && obj == null) {
+    if (_attributes.length >= _limits.maxNumAttributes && !isKeyInCurrentMap) {
       _droppedSpanAttributes++;
       return;
     }
-    _attributes
-        .add(_rebuildAttribute(attribute, _limits.maxNumAttributeLength));
+    _attributes.add(_rebuildAttribute(attribute, _limits.maxNumAttributeLength));
   }
 
   static api.Attribute _rebuildAttribute(api.Attribute attr, int maxLength) {
@@ -133,29 +139,26 @@ class Span implements api.Span {
     if (maxLength < 0) return attr;
 
     if (attr.value is String) {
-      attr = api.Attribute.fromString(
-          attr.key, _applyAttributeLengthLimit(attr.value, maxLength));
+      final stringValue = attr.value as String;
+      attr = api.Attribute.fromString(attr.key, _applyAttributeLengthLimit(stringValue, maxLength));
     } else if (attr.value is List<String>) {
-      final listString = attr.value as List<String>;
-      for (var j = 0; j < listString.length; j++) {
-        listString[j] = _applyAttributeLengthLimit(listString[j], maxLength);
+      final listStringValue = attr.value as List<String>;
+      for (var j = 0; j < listStringValue.length; j++) {
+        listStringValue[j] = _applyAttributeLengthLimit(listStringValue[j], maxLength);
       }
-      attr = api.Attribute.fromStringList(attr.key, listString);
+      attr = api.Attribute.fromStringList(attr.key, listStringValue);
     }
     return attr;
   }
 
   @override
-  void recordException(dynamic exception, {StackTrace stackTrace}) {
+  void recordException(dynamic exception, StackTrace stackTrace) {
     // ignore: todo
     // TODO: O11Y-1531: Consider integration of Events here.
     setAttributes([
-      api.Attribute.fromString(api.SemanticAttributes.exceptionType,
-          exception.runtimeType.toString()),
-      api.Attribute.fromString(
-          api.SemanticAttributes.exceptionMessage, exception.toString()),
-      api.Attribute.fromString(
-          api.SemanticAttributes.exceptionStacktrace, stackTrace.toString()),
+      api.Attribute.fromString(api.SemanticAttributes.exceptionType, exception.runtimeType.toString()),
+      api.Attribute.fromString(api.SemanticAttributes.exceptionMessage, exception.toString()),
+      api.Attribute.fromString(api.SemanticAttributes.exceptionStacktrace, stackTrace.toString()),
     ]);
   }
 
@@ -163,15 +166,13 @@ class Span implements api.Span {
   api.SpanKind get kind => _kind;
 
   @override
-  void addEvent(String name, Int64 timestamp,
-      {List<api.Attribute> attributes}) {
+  void addEvent(String name, Int64 timestamp, {List<api.Attribute>? attributes}) {
     // TODO: O11Y-1531
     throw UnimplementedError();
   }
 
   // This method just can be called once during construction.
-  static List<api.SpanLink> _applyLinkLimits(
-      List<api.SpanLink> links, sdk.SpanLimits limits) {
+  static List<api.SpanLink> _applyLinkLimits(List<api.SpanLink>? links, sdk.SpanLimits limits) {
     if (links == null) return [];
     final spanLink = <api.SpanLink>[];
 
@@ -190,19 +191,17 @@ class Span implements api.Span {
       for (final attr in link.attributes) {
         // if attributes num is already greater than maxNumAttributesPerLink
         // and this key doesn't exist in the list, drop it.
-        if (attributeMap.length >= limits.maxNumAttributesPerLink &&
-            !attributeMap.containsKey(attr.key)) {
+        if (attributeMap.length >= limits.maxNumAttributesPerLink && !attributeMap.containsKey(attr.key)) {
           continue;
         }
 
         // apply maxNumAttributeLength limit.
-        final trimedAttr =
-            _rebuildAttribute(attr, limits.maxNumAttributeLength);
+        final trimedAttr = _rebuildAttribute(attr, limits.maxNumAttributeLength);
 
         // if this key has been added before, found its index,
         // and replace it with new value.
         if (attributeMap.containsKey(attr.key)) {
-          final idx = attributeMap[attr.key];
+          final idx = attributeMap[attr.key]!;
           linkAttributes[idx] = trimedAttr;
         } else {
           // record this new key's index with linkAttributes length,

@@ -6,23 +6,18 @@ import '../../../api.dart' as api;
 /// Class representing an ID for a single Trace.
 /// See https://www.w3.org/TR/trace-context/#trace-id for full specification.
 class TraceId {
-  static const sizeBits = 32;
-  static const sizeBytes = 16;
+  const TraceId(this._id);
 
-  List<int> _id;
+  TraceId.fromIdGenerator(api.IdGenerator generator) : this(generator.generateTraceId());
 
-  TraceId(this._id);
-  TraceId.fromIdGenerator(api.IdGenerator generator) {
-    _id = generator.generateTraceId();
-  }
-  TraceId.fromString(String id) {
-    _id = [];
-    id = id.padLeft(TraceId.sizeBits, '0');
+  TraceId.fromString(String id) : _id = [] {
+    id = id.padLeft(sizeBits, '0');
 
     for (var i = 0; i < id.length; i += 2) {
       _id.add(int.parse('${id[i]}${id[i + 1]}', radix: 16));
     }
   }
+
   TraceId.invalid() : this(List<int>.filled(sizeBytes, 0));
 
   /// Retrieve this TraceId as a list of byte values.
@@ -33,6 +28,10 @@ class TraceId {
 
   /// Retrieve this SpanId as a human-readable ID.
   @override
-  String toString() =>
-      _id.map((x) => x.toRadixString(16).padLeft(2, '0')).join();
+  String toString() => _id.map((x) => x.toRadixString(16).padLeft(2, '0')).join();
+
+  static const sizeBits = 32;
+  static const sizeBytes = 16;
+
+  final List<int> _id;
 }

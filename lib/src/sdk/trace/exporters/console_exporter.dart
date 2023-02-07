@@ -17,9 +17,8 @@ class ConsoleExporter implements SpanExporter {
         'name': span.name,
         'id': '${span.spanContext.spanId}',
         'timestamp': span.startTime,
-        'duration': span.endTime - span.startTime,
-        'flags':
-            '${span.spanContext.traceFlags.toRadixString(16).padLeft(2, '0')}',
+        'duration': span.endTime != null ? (span.endTime! - span.startTime) : 0,
+        'flags': '${span.spanContext.traceFlags.toRadixString(16).padLeft(2, '0')}',
         'state': '${span.spanContext.traceState}',
         'status': span.status.code
       });
@@ -31,7 +30,6 @@ class ConsoleExporter implements SpanExporter {
     if (_isShutdown) {
       return;
     }
-
     _printSpans(spans);
   }
 
