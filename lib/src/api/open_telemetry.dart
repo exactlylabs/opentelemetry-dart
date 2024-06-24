@@ -8,11 +8,11 @@ import '../../sdk.dart' as sdk;
 
 final api.TracerProvider _noopTracerProvider = sdk.TracerProviderBase();
 api.TracerProvider _tracerProvider = _noopTracerProvider;
-api.TextMapPropagator _textMapPropagator;
+api.TextMapPropagator? _textMapPropagator;
 
 api.TracerProvider get globalTracerProvider => _tracerProvider;
 
-api.TextMapPropagator get globalTextMapPropagator => _textMapPropagator;
+api.TextMapPropagator? get globalTextMapPropagator => _textMapPropagator;
 
 void registerGlobalTracerProvider(api.TracerProvider tracerProvider) {
   if (_tracerProvider != _noopTracerProvider) {
@@ -36,8 +36,7 @@ void registerGlobalTextMapPropagator(api.TextMapPropagator textMapPropagator) {
 
 /// Records a span of the given [name] for the given function with a given
 /// [api.Tracer] and marks the span as errored if an exception occurs.
-Future<T> trace<T>(String name, Future<T> Function() fn,
-    {api.Context context, api.Tracer tracer}) async {
+Future<T> trace<T>(String name, Future<T> Function() fn, {api.Context? context, api.Tracer? tracer}) async {
   context ??= api.Context.current;
   tracer ??= _tracerProvider.getTracer('opentelemetry-dart');
 
@@ -45,10 +44,10 @@ Future<T> trace<T>(String name, Future<T> Function() fn,
 
   try {
     return await context.withSpan(span).execute(fn);
-  } catch (e, s) {
+  } catch (exception, stackTrace) {
     span
-      ..setStatus(api.StatusCode.error, description: e.toString())
-      ..recordException(e, stackTrace: s);
+      ..setStatus(api.StatusCode.error, exception.toString())
+      ..recordException(exception, stackTrace);
     rethrow;
   } finally {
     span.end();
@@ -56,8 +55,7 @@ Future<T> trace<T>(String name, Future<T> Function() fn,
 }
 
 /// Use [traceSync] instead of [trace] when [fn] is not an async function.
-R traceSync<R>(String name, R Function() fn,
-    {api.Context context, api.Tracer tracer}) {
+R traceSync<R>(String name, R Function() fn, {api.Context? context, api.Tracer? tracer}) {
   context ??= api.Context.current;
   tracer ??= _tracerProvider.getTracer('opentelemetry-dart');
 
@@ -67,15 +65,14 @@ R traceSync<R>(String name, R Function() fn,
     final r = context.withSpan(span).execute(fn);
 
     if (r is Future) {
-      throw ArgumentError.value(fn, 'fn',
-          'Use traceSync to trace functions that do not return a [Future].');
+      throw ArgumentError.value(fn, 'fn', 'Use traceSync to trace functions that do not return a [Future].');
     }
 
     return r;
-  } catch (e, s) {
+  } catch (exception, stackTrace) {
     span
-      ..setStatus(api.StatusCode.error, description: e.toString())
-      ..recordException(e, stackTrace: s);
+      ..setStatus(api.StatusCode.error, exception.toString())
+      ..recordException(exception, stackTrace);
     rethrow;
   } finally {
     span.end();

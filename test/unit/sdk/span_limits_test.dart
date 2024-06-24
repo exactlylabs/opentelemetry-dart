@@ -21,160 +21,141 @@ void main() {
   final attrInt = Attribute.fromInt('intKey', 12);
   final attrBool = Attribute.fromBoolean('boolKey', true);
   final attrDoubleArray = Attribute.fromDoubleList('doubleList', [0.1, 0.2]);
-  final attrStringArray =
-      Attribute.fromStringList('stringList', ['1111', '1111111']);
+  final attrStringArray = Attribute.fromStringList('stringList', ['1111', '1111111']);
   final limits = sdk.SpanLimits(
       maxNumAttributes: maxAttributes,
       maxNumAttributeLength: maxAttributeLength,
       maxNumLink: maxLinks,
       maxNumAttributesPerLink: maxAttributesPerLink);
-  final context = sdk.SpanContext(TraceId([1, 2, 3]), SpanId([7, 8, 9]),
-      TraceFlags.none, sdk.TraceState.empty());
+  final context = sdk.SpanContext(TraceId([1, 2, 3]), SpanId([7, 8, 9]), TraceFlags.none, sdk.TraceState.empty());
   final spanLink1 = SpanLink(context, attributes: [attrShort]);
   final spanLink2 = SpanLink(context, attributes: [attrShort, attrLong]);
-  final spanLink3 =
-      SpanLink(context, attributes: [attrShort, dupShort, attrInt, attrBool]);
+  final spanLink3 = SpanLink(context, attributes: [attrShort, dupShort, attrInt, attrBool]);
   final spanLink4 = SpanLink(context, attributes: []);
-  final spanLinkStrs = SpanLink(context,
-      attributes: [attrShort, attrLong, attrStringArray, dupShort]);
-  final spanLinkDup = SpanLink(context, attributes: [
-    attrShort,
-    dupShort,
-    attrLong,
-    dupLong,
-    dupShort2,
-    dupLong2
-  ]);
+  final spanLinkStrs = SpanLink(context, attributes: [attrShort, attrLong, attrStringArray, dupShort]);
+  final spanLinkDup = SpanLink(context, attributes: [attrShort, dupShort, attrLong, dupLong, dupShort2, dupLong2]);
   final spanLinkNoAttr = SpanLink(context);
 
   test('test default spanLimits', () {
-    final span = sdk.Span('limitTest', null, SpanId([4, 5, 6]), [],
-        sdk.DateTimeTimeProvider(), null, null,
-        attributes: [attrShort, attrDoubleArray, attrStringArray],
-        limits: sdk.SpanLimits());
+    final span = sdk.Span('limitTest', sdk.SpanContext.invalid(), SpanId([4, 5, 6]), [], sdk.DateTimeTimeProvider(),
+        sdk.Resource([]), sdk.InstrumentationLibrary('library_name', 'library_version'),
+        attributes: [attrShort, attrDoubleArray, attrStringArray], limits: sdk.SpanLimits());
     expect(span.attributes.length, equals(3));
-    expect(span.attributes.get('shortkey'),
-        equals((attrShort.value as String).substring(0, maxAttributeLength)));
+    expect(span.attributes.get('shortkey'), equals((attrShort.value as String).substring(0, maxAttributeLength)));
     expect(span.attributes.get('doubleList'), equals([0.1, 0.2]));
     expect(span.attributes.get('stringList'), equals(['1111', '1111111']));
   });
 
   test('test spanLimits maxNumAttributes', () {
-    final span = sdk.Span('foo', null, SpanId([4, 5, 6]), [],
-        sdk.DateTimeTimeProvider(), null, null,
+    final span = sdk.Span('foo', sdk.SpanContext.invalid(), SpanId([4, 5, 6]), [], sdk.DateTimeTimeProvider(),
+        sdk.Resource([]), sdk.InstrumentationLibrary('library_name', 'library_version'),
         attributes: [attrShort, attrLong, attrInt, attrBool], limits: limits);
     expect(span.attributes.length, equals(maxAttributes));
-    expect(span.attributes.get('boolean'), equals(null));
+    expect(
+        () => span.attributes.get('boolean'),
+        throwsA(isA<ArgumentError>()
+            .having((error) => error.message, 'message', 'Attribute with key boolean does not exist.')));
   });
 
   test('test spanLimits maxNumAttributeLength', () {
-    final span = sdk.Span('foo', null, SpanId([4, 5, 6]), [],
-        sdk.DateTimeTimeProvider(), null, null,
+    final span = sdk.Span('foo', sdk.SpanContext.invalid(), SpanId([4, 5, 6]), [], sdk.DateTimeTimeProvider(),
+        sdk.Resource([]), sdk.InstrumentationLibrary('library_name', 'library_version'),
         attributes: [attrShort, attrLong], limits: limits);
-    expect(span.attributes.get('shortkey'),
-        equals((attrShort.value as String).substring(0, maxAttributeLength)));
-    expect(span.attributes.get('longkey'),
-        equals((attrLong.value as String).substring(0, maxAttributeLength)));
+    expect(span.attributes.get('shortkey'), equals((attrShort.value as String).substring(0, maxAttributeLength)));
+    expect(span.attributes.get('longkey'), equals((attrLong.value as String).substring(0, maxAttributeLength)));
   });
 
   test('test spanLimits from span constructor', () {
-    final span = sdk.Span(
-        'test', null, null, [], sdk.DateTimeTimeProvider(), null, null,
+    final span = sdk.Span('test', sdk.SpanContext.invalid(), SpanId.invalid(), [], sdk.DateTimeTimeProvider(),
+        sdk.Resource([]), sdk.InstrumentationLibrary('library_name', 'library_version'),
         limits: limits)
       ..setAttributes([attrShort, attrInt, attrDoubleArray]);
     expect(span.attributes.length, equals(3));
-    expect(span.attributes.get('shortkey'),
-        equals((attrShort.value as String).substring(0, maxAttributeLength)));
+    expect(span.attributes.get('shortkey'), equals((attrShort.value as String).substring(0, maxAttributeLength)));
     expect(span.attributes.get('intKey'), equals(12));
     expect(span.attributes.get('doubleList'), equals([0.1, 0.2]));
   });
 
   test('test spanLimits maxNumAttributes from span constructor', () {
-    final span = sdk.Span(
-        'test', null, null, [], sdk.DateTimeTimeProvider(), null, null,
+    final span = sdk.Span('test', sdk.SpanContext.invalid(), SpanId.invalid(), [], sdk.DateTimeTimeProvider(),
+        sdk.Resource([]), sdk.InstrumentationLibrary('library_name', 'library_version'),
         limits: limits)
-      ..setAttributes(
-          [attrShort, attrLong, attrInt, attrBool, attrStringArray]);
+      ..setAttributes([attrShort, attrLong, attrInt, attrBool, attrStringArray]);
     expect(span.attributes.length, equals(maxAttributes));
-    expect(span.attributes.get('boolean'), equals(null));
+    expect(
+        () => span.attributes.get('boolean'),
+        throwsA(isA<ArgumentError>()
+            .having((error) => error.message, 'message', 'Attribute with key boolean does not exist.')));
     expect(span.droppedAttributes, equals(2));
   });
 
   test('test spanLimits maxNumAttributeLength with setAttributes', () {
-    final span = sdk.Span(
-        'test', null, null, [], sdk.DateTimeTimeProvider(), null, null,
+    final span = sdk.Span('test', sdk.SpanContext.invalid(), SpanId.invalid(), [], sdk.DateTimeTimeProvider(),
+        sdk.Resource([]), sdk.InstrumentationLibrary('library_name', 'library_version'),
         limits: limits)
       ..setAttributes([attrShort, attrLong]);
-    expect(span.attributes.get('shortkey'),
-        equals((attrShort.value as String).substring(0, maxAttributeLength)));
-    expect(span.attributes.get('longkey'),
-        equals((attrLong.value as String).substring(0, maxAttributeLength)));
+    expect(span.attributes.get('shortkey'), equals((attrShort.value as String).substring(0, maxAttributeLength)));
+    expect(span.attributes.get('longkey'), equals((attrLong.value as String).substring(0, maxAttributeLength)));
   });
 
   test('test spanLimits from span, then add more', () {
-    final span = sdk.Span(
-        'test', null, null, [], sdk.DateTimeTimeProvider(), null, null,
+    final span = sdk.Span('test', sdk.SpanContext.invalid(), SpanId.invalid(), [], sdk.DateTimeTimeProvider(),
+        sdk.Resource([]), sdk.InstrumentationLibrary('library_name', 'library_version'),
         limits: limits)
       ..setAttribute(attrShort);
-    expect(span.attributes.get('shortkey'),
-        equals((attrShort.value as String).substring(0, maxAttributeLength)));
+    expect(span.attributes.get('shortkey'), equals((attrShort.value as String).substring(0, maxAttributeLength)));
     span.setAttribute(attrLong);
-    expect(span.attributes.get('longkey'),
-        equals((attrLong.value as String).substring(0, maxAttributeLength)));
+    expect(span.attributes.get('longkey'), equals((attrLong.value as String).substring(0, maxAttributeLength)));
     span.setAttribute(attrBool);
     expect(span.droppedAttributes, equals(0));
     expect(span.attributes.length, equals(maxAttributes));
     expect(span.attributes.get('boolKey'), equals(true));
     span.setAttribute(attrDoubleArray);
     expect(span.attributes.length, equals(maxAttributes));
-    expect(span.attributes.get('doubleList'), equals(null));
+    expect(
+        () => span.attributes.get('doubleList'),
+        throwsA(isA<ArgumentError>()
+            .having((error) => error.message, 'message', 'Attribute with key doubleList does not exist.')));
     expect(span.droppedAttributes, equals(1));
   });
 
   test('test add same key twice', () {
-    final span = sdk.Span(
-        'test', null, null, [], sdk.DateTimeTimeProvider(), null, null,
+    final span = sdk.Span('test', sdk.SpanContext.invalid(), SpanId.invalid(), [], sdk.DateTimeTimeProvider(),
+        sdk.Resource([]), sdk.InstrumentationLibrary('library_name', 'library_version'),
         limits: limits)
       ..setAttributes([attrShort, dupShort]);
     expect(span.attributes.length, 1);
-    expect(span.attributes.get('shortkey'),
-        equals((dupShort.value as String).substring(0, maxAttributeLength)));
+    expect(span.attributes.get('shortkey'), equals((dupShort.value as String).substring(0, maxAttributeLength)));
     span.setAttributes([attrLong, dupLong]);
     expect(span.attributes.length, 2);
-    expect(span.attributes.get('longkey'),
-        equals((dupLong.value as String).substring(0, maxAttributeLength)));
+    expect(span.attributes.get('longkey'), equals((dupLong.value as String).substring(0, maxAttributeLength)));
     expect(span.droppedAttributes, equals(0));
   });
 
   test('test add same key multitimes from constructor', () {
-    final span = sdk.Span(
-        'test', null, null, [], sdk.DateTimeTimeProvider(), null, null,
+    final span = sdk.Span('test', sdk.SpanContext.invalid(), SpanId.invalid(), [], sdk.DateTimeTimeProvider(),
+        sdk.Resource([]), sdk.InstrumentationLibrary('library_name', 'library_version'),
         limits: limits)
-      ..setAttributes(
-          [attrShort, dupShort, attrLong, dupLong, dupShort2, dupLong2]);
+      ..setAttributes([attrShort, dupShort, attrLong, dupLong, dupShort2, dupLong2]);
     expect(span.attributes.length, 2);
-    expect(span.attributes.get('shortkey'),
-        equals((dupShort2.value as String).substring(0, maxAttributeLength)));
-    expect(span.attributes.get('longkey'),
-        equals((dupLong2.value as String).substring(0, maxAttributeLength)));
+    expect(span.attributes.get('shortkey'), equals((dupShort2.value as String).substring(0, maxAttributeLength)));
+    expect(span.attributes.get('longkey'), equals((dupLong2.value as String).substring(0, maxAttributeLength)));
   });
 
   test('test add oversized string list', () {
-    final span = sdk.Span(
-        'test', null, null, [], sdk.DateTimeTimeProvider(), null, null,
+    final span = sdk.Span('test', sdk.SpanContext.invalid(), SpanId.invalid(), [], sdk.DateTimeTimeProvider(),
+        sdk.Resource([]), sdk.InstrumentationLibrary('library_name', 'library_version'),
         limits: limits)
       ..setAttributes([attrShort, dupShort, attrLong, dupLong]);
     expect(span.attributes.length, 2);
-    expect(span.attributes.get('shortkey'),
-        equals((dupShort.value as String).substring(0, maxAttributeLength)));
-    expect(span.attributes.get('longkey'),
-        equals((dupLong.value as String).substring(0, maxAttributeLength)));
+    expect(span.attributes.get('shortkey'), equals((dupShort.value as String).substring(0, maxAttributeLength)));
+    expect(span.attributes.get('longkey'), equals((dupLong.value as String).substring(0, maxAttributeLength)));
     expect(span.droppedAttributes, equals(0));
   });
 
   test('test spanlink unlimited', () {
-    final span = sdk.Span(
-        'test', null, null, [], sdk.DateTimeTimeProvider(), null, null,
+    final span = sdk.Span('test', sdk.SpanContext.invalid(), SpanId.invalid(), [], sdk.DateTimeTimeProvider(),
+        sdk.Resource([]), sdk.InstrumentationLibrary('library_name', 'library_version'),
         links: [spanLink1, spanLink2]);
 
     expect(span.links.length, equals(2));
@@ -185,16 +166,15 @@ void main() {
   });
 
   test('test add spanlinks greater than maxLinks', () {
-    final span = sdk.Span(
-        'test', null, null, [], sdk.DateTimeTimeProvider(), null, null,
+    final span = sdk.Span('test', sdk.SpanContext.invalid(), SpanId.invalid(), [], sdk.DateTimeTimeProvider(),
+        sdk.Resource([]), sdk.InstrumentationLibrary('library_name', 'library_version'),
         limits: limits, links: [spanLink1, spanLink2, spanLink3, spanLink4]);
     assert(span.links.length <= maxLinks);
   });
 
-  test('test add more attributes than maxNumAttributesPerLink in spanlinks',
-      () {
-    final span = sdk.Span(
-        'test', null, null, [], sdk.DateTimeTimeProvider(), null, null,
+  test('test add more attributes than maxNumAttributesPerLink in spanlinks', () {
+    final span = sdk.Span('test', sdk.SpanContext.invalid(), SpanId.invalid(), [], sdk.DateTimeTimeProvider(),
+        sdk.Resource([]), sdk.InstrumentationLibrary('library_name', 'library_version'),
         limits: limits, links: [spanLink3]);
     for (var i = 0; i < span.links.length; i++) {
       final link = span.links[i];
@@ -204,8 +184,8 @@ void main() {
   });
 
   test('test spanlinks with string and string list attributes', () {
-    final span = sdk.Span(
-        'test', null, null, [], sdk.DateTimeTimeProvider(), null, null,
+    final span = sdk.Span('test', sdk.SpanContext.invalid(), SpanId.invalid(), [], sdk.DateTimeTimeProvider(),
+        sdk.Resource([]), sdk.InstrumentationLibrary('library_name', 'library_version'),
         limits: limits, links: [spanLinkStrs]);
     for (var i = 0; i < span.links.length; i++) {
       final link = span.links[i];
@@ -215,7 +195,7 @@ void main() {
         if (attribute.value is String) {
           assert((attribute.value as String).length <= maxAttributeLength);
         } else if (attribute.value is List<String>) {
-          for (final value in attribute.value) {
+          for (final value in attribute.value as List<String>) {
             assert(value.length <= maxAttributeLength);
           }
         }
@@ -224,8 +204,8 @@ void main() {
   });
 
   test('test spanlink has duplicated attributes', () {
-    final span = sdk.Span(
-        'test', null, null, [], sdk.DateTimeTimeProvider(), null, null,
+    final span = sdk.Span('test', sdk.SpanContext.invalid(), SpanId.invalid(), [], sdk.DateTimeTimeProvider(),
+        sdk.Resource([]), sdk.InstrumentationLibrary('library_name', 'library_version'),
         limits: limits, links: [spanLinkDup]);
 
     expect(span.links.length, equals(1));
@@ -241,8 +221,8 @@ void main() {
   });
 
   test('test spanlink has no attributes', () {
-    final span = sdk.Span(
-        'test', null, null, [], sdk.DateTimeTimeProvider(), null, null,
+    final span = sdk.Span('test', sdk.SpanContext.invalid(), SpanId.invalid(), [], sdk.DateTimeTimeProvider(),
+        sdk.Resource([]), sdk.InstrumentationLibrary('library_name', 'library_version'),
         links: [spanLinkNoAttr]);
 
     expect(span.links.length, equals(1));

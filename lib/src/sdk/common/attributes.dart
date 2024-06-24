@@ -5,17 +5,23 @@ import '../../../api.dart';
 
 /// A representation of a collection of metadata attached to a trace span.
 class Attributes {
-  Map<String, Object> _attributes = {};
+  Attributes() : _attributes = {};
 
   /// Instantiate an empty Attributes.
-  Attributes.empty() {
-    _attributes = {};
-  }
+  Attributes.empty() : this();
 
   /// Retrieve the value associated with the Attribute with key [key].
-  Object get(String key) => _attributes[key];
+  Object get(String key) {
+    if (!_attributes.containsKey(key)) {
+      throw ArgumentError('Attribute with key $key does not exist.');
+    }
+    return _attributes[key]!;
+  }
 
-  ///
+  /// Check if an Attribute with key [key] exists.
+  bool containsKey(String key) => _attributes.containsKey(key);
+
+  /// Retrieve the number of Attributes in this collection.
   int get length => _attributes.length;
 
   /// Retrieve the keys of all Attributes in this collection.
@@ -32,4 +38,6 @@ class Attributes {
   void addAll(List<Attribute> attributes) {
     attributes.forEach(add);
   }
+
+  final Map<String, Object> _attributes;
 }

@@ -14,27 +14,20 @@ class MeterProvider implements api.MeterProvider {
 
   sdk.Resource get resource => _sharedState.resource;
 
-  MeterProvider({sdk.Resource resource})
-      : _sharedState = MeterProviderSharedState(resource);
+  MeterProvider(sdk.Resource resource) : _sharedState = MeterProviderSharedState(resource);
 
   @override
-  api.Meter get(String name,
-      {String version = '',
-      String schemaUrl = '',
-      List<api.Attribute> attributes = const []}) {
+  api.Meter get(String? name, {String version = '', String schemaUrl = '', List<api.Attribute> attributes = const []}) {
     if (name == null || name == '') {
       name = '';
       _logger.warning(invalidMeterNameMessage, '', StackTrace.current);
     }
 
     if (_shutdown) {
-      _logger.warning('A shutdown MeterProvider cannot provide a Meter', '',
-          StackTrace.current);
+      _logger.warning('A shutdown MeterProvider cannot provide a Meter', '', StackTrace.current);
       return api.NoopMeter();
     }
 
-    return _sharedState
-        .getMeterSharedState(InstrumentationScope(name, version, schemaUrl, attributes))
-        .meter;
+    return _sharedState.getMeterSharedState(InstrumentationScope(name, version, schemaUrl, attributes)).meter;
   }
 }

@@ -5,7 +5,7 @@ import '../../../../api.dart' as api;
 
 class SimpleSpanProcessor implements api.SpanProcessor {
   final api.SpanExporter _exporter;
-  bool _isShutdown = false;
+  var _isShutdown = false;
 
   SimpleSpanProcessor(this._exporter);
 
@@ -19,12 +19,13 @@ class SimpleSpanProcessor implements api.SpanProcessor {
     if (_isShutdown) {
       return;
     }
-
     _exporter.export([span]);
   }
 
   @override
-  void onStart(api.Span span, api.Context parentContext) {}
+  void onStart(api.Span span, api.Context? parentContext) {
+    // No-op
+  }
 
   @override
   void shutdown() {

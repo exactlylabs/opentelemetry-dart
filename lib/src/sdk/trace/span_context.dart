@@ -28,14 +28,11 @@ class SpanContext implements api.SpanContext {
   bool get isValid => spanId.isValid && traceId.isValid;
 
   /// Construct a [SpanContext].
-  SpanContext(this._traceId, this._spanId, this._traceFlags, this._traceState)
-      : _isRemote = false;
+  SpanContext(this._traceId, this._spanId, this._traceFlags, this._traceState) : _isRemote = false;
 
   /// Construct a [SpanContext] representing an operation which originated
   /// from a remote source.
-  SpanContext.remote(
-      this._traceId, this._spanId, this._traceFlags, this._traceState)
-      : _isRemote = true;
+  SpanContext.remote(this._traceId, this._spanId, this._traceFlags, this._traceState) : _isRemote = true;
 
   /// Construct an invalid [SpanContext].
   SpanContext.invalid()

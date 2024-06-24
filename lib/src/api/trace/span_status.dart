@@ -16,6 +16,11 @@ enum StatusCode {
 
 /// A representation of the status of a Span.
 class SpanStatus {
-  StatusCode code = StatusCode.unset;
-  String description;
+  /// Creates a new [SpanStatus] with the given [code] and [description].
+  /// If no [code] is provided, [StatusCode.unset] is used.
+  /// If no [description] is provided, an empty string is used.
+  SpanStatus([this.code = StatusCode.unset, this.description]);
+
+  final StatusCode code;
+  final String? description;
 }

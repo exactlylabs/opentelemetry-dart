@@ -1,13 +1,14 @@
 init:
 	dart pub get
-	dart pub global activate protoc_plugin 19.3.1
+	dart pub global activate protoc_plugin 20.0.1
 	cd lib/src/sdk/proto && \
 		protoc --proto_path opentelemetry-proto \
 		--dart_out . \
 		opentelemetry-proto/opentelemetry/proto/common/v1/common.proto \
 		opentelemetry-proto/opentelemetry/proto/collector/trace/v1/trace_service.proto \
 		opentelemetry-proto/opentelemetry/proto/trace/v1/trace.proto \
-		opentelemetry-proto/opentelemetry/proto/resource/v1/resource.proto
+		opentelemetry-proto/opentelemetry/proto/resource/v1/resource.proto \
+		--plugin=protoc-gen-dart=/Users/ignaciograsso/.pub-cache/bin/protoc-gen-dart
 
 analyze:
 	@dart analyze

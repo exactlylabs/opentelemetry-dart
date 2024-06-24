@@ -37,7 +37,7 @@ abstract class Span {
   api.SpanContext get spanContext;
 
   /// Get the time when the span was closed, or null if still open.
-  Int64 get endTime;
+  Int64? get endTime;
 
   /// Get the time when the span was started.
   Int64 get startTime;
@@ -46,7 +46,7 @@ abstract class Span {
   api.SpanId get parentSpanId;
 
   /// The name of the span.
-  String name;
+  String get name;
 
   /// Whether this Span is recording information like events with the
   /// addEvent operation, status with setStatus, etc.
@@ -62,7 +62,7 @@ abstract class Span {
   ///
   /// Only the value of the last call will be recorded, and implementations are
   /// free to ignore previous calls.
-  void setStatus(api.StatusCode status, {String description});
+  void setStatus(api.StatusCode code, String description);
 
   /// Retrieve the status of the [Span].
   api.SpanStatus get status;
@@ -83,5 +83,5 @@ abstract class Span {
   void end();
 
   /// Record metadata about an exception occurring during this span.
-  void recordException(dynamic exception, {StackTrace stackTrace});
+  void recordException(dynamic exception, StackTrace stackTrace);
 }

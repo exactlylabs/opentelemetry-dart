@@ -111,6 +111,7 @@ A web-specific trace provider is also available.  This trace provider makes avai
 
 ```dart
 import 'package:opentelemetry/sdk.dart' as otel_sdk;
+import 'package:opentelemetry/api.dart' as otel_api;
 import 'package:opentelemetry/web_sdk.dart' as web_sdk;
 
 final exporter = otel_sdk.CollectorExporter(Uri.parse('https://my-collector.com/v1/traces'));
@@ -129,8 +130,8 @@ final provider = web_sdk.WebTracerProvider(
 final tracer = provider.getTracer('instrumentation-name');
 
 // Or, these trace providers can also be registered globally.
-otel_sdk.registerGlobalTracerProvider(provider);
-final tracer = otel_sdk.globalTracerProvider.getTracer('instrumentation-name');
+otel_api.registerGlobalTracerProvider(provider);
+final tracer = otel_api.globalTracerProvider.getTracer('instrumentation-name');
 ```
 
 Important Note: Span timestamps resulting from use of this trace provider may be inaccurate if the executing system is suspended for sleep.

@@ -17,8 +17,7 @@ void main() {
     final parentSpanId = api.SpanId([4, 5, 6]);
     final span = Span(
         'foo',
-        sdk.SpanContext(api.TraceId([1, 2, 3]), api.SpanId([7, 8, 9]),
-            api.TraceFlags.none, sdk.TraceState.empty()),
+        sdk.SpanContext(api.TraceId([1, 2, 3]), api.SpanId([7, 8, 9]), api.TraceFlags.none, sdk.TraceState.empty()),
         parentSpanId,
         [mockProcessor1, mockProcessor2],
         sdk.DateTimeTimeProvider(),
@@ -47,8 +46,7 @@ void main() {
   test('span status', () {
     final span = Span(
         'foo',
-        sdk.SpanContext(api.TraceId([1, 2, 3]), api.SpanId([7, 8, 9]),
-            api.TraceFlags.none, sdk.TraceState.empty()),
+        sdk.SpanContext(api.TraceId([1, 2, 3]), api.SpanId([7, 8, 9]), api.TraceFlags.none, sdk.TraceState.empty()),
         api.SpanId([4, 5, 6]),
         [],
         sdk.DateTimeTimeProvider(),
@@ -60,32 +58,29 @@ void main() {
     expect(span.status.description, equals(null));
 
     // Verify that span status can be set to "Error".
-    span.setStatus(api.StatusCode.error, description: 'Something s\'ploded.');
+    span.setStatus(api.StatusCode.error, 'Something s\'ploded.');
     expect(span.status.code, equals(api.StatusCode.error));
     expect(span.status.description, equals('Something s\'ploded.'));
 
     // Verify that multiple errors update the span to the most recently set.
-    span.setStatus(api.StatusCode.error,
-        description: 'Another error happened.');
+    span.setStatus(api.StatusCode.error, 'Another error happened.');
     expect(span.status.code, equals(api.StatusCode.error));
     expect(span.status.description, equals('Another error happened.'));
 
     // Verify that span status cannot be set to "Unset" and that description
     // is ignored for statuses other than "Error".
-    span.setStatus(api.StatusCode.unset,
-        description: 'Oops.  Can we turn this back off?');
+    span.setStatus(api.StatusCode.unset, 'Oops.  Can we turn this back off?');
     expect(span.status.code, equals(api.StatusCode.error));
     expect(span.status.description, equals('Another error happened.'));
 
     // Verify that span status can be set to "Ok" and that description is
     // ignored for statuses other than "Error".
-    span.setStatus(api.StatusCode.ok, description: 'All done here.');
+    span.setStatus(api.StatusCode.ok, 'All done here.');
     expect(span.status.code, equals(api.StatusCode.ok));
     expect(span.status.description, equals('Another error happened.'));
 
     // Verify that span status cannot be changed once set to "Ok".
-    span.setStatus(api.StatusCode.error,
-        description: 'Something else went wrong.');
+    span.setStatus(api.StatusCode.error, 'Something else went wrong.');
     expect(span.status.code, equals(api.StatusCode.ok));
     expect(span.status.description, equals('Another error happened.'));
   });
@@ -113,8 +108,7 @@ void main() {
     };
     final span = Span(
         'foo',
-        sdk.SpanContext(api.TraceId([1, 2, 3]), api.SpanId([7, 8, 9]),
-            api.TraceFlags.none, sdk.TraceState.empty()),
+        sdk.SpanContext(api.TraceId([1, 2, 3]), api.SpanId([7, 8, 9]), api.TraceFlags.none, sdk.TraceState.empty()),
         api.SpanId([4, 5, 6]),
         [],
         sdk.DateTimeTimeProvider(),
@@ -137,8 +131,7 @@ void main() {
   test('span record error', () {
     final span = Span(
         'foo',
-        sdk.SpanContext(api.TraceId([1, 2, 3]), api.SpanId([7, 8, 9]),
-            api.TraceFlags.none, sdk.TraceState.empty()),
+        sdk.SpanContext(api.TraceId([1, 2, 3]), api.SpanId([7, 8, 9]), api.TraceFlags.none, sdk.TraceState.empty()),
         api.SpanId([4, 5, 6]),
         [],
         sdk.DateTimeTimeProvider(),
@@ -147,13 +140,11 @@ void main() {
 
     try {
       throw Exception('Oh noes!');
-    } catch (e, s) {
-      span.recordException(e, stackTrace: s);
+    } catch (exception, stackTrace) {
+      span.recordException(exception, stackTrace);
     }
 
-    expect(span.attributes.get(api.SemanticAttributes.exceptionType),
-        equals('_Exception'));
-    expect(span.attributes.get(api.SemanticAttributes.exceptionMessage),
-        equals('Exception: Oh noes!'));
+    expect(span.attributes.get(api.SemanticAttributes.exceptionType), equals('_Exception'));
+    expect(span.attributes.get(api.SemanticAttributes.exceptionMessage), equals('Exception: Oh noes!'));
   });
 }

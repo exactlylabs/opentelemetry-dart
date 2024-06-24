@@ -13,18 +13,16 @@ void main() {
     final traceState = sdk.TraceState.fromString('test=onetwo');
     final testSpan = Span(
         'foo',
-        sdk.SpanContext(
-            traceId, api.SpanId([7, 8, 9]), api.TraceFlags.none, traceState),
+        sdk.SpanContext(traceId, api.SpanId([7, 8, 9]), api.TraceFlags.none, traceState),
         api.SpanId([4, 5, 6]),
         [],
         sdk.DateTimeTimeProvider(),
         sdk.Resource([]),
-        sdk.InstrumentationLibrary(
-            'always_on_sampler_test', 'sampler_test_version'));
+        sdk.InstrumentationLibrary('always_on_sampler_test', 'sampler_test_version'));
     final testContext = api.Context.current.withSpan(testSpan);
 
-    final result = sdk.AlwaysOnSampler().shouldSample(
-        testContext, traceId, testSpan.name, api.SpanKind.internal, [], []);
+    final result =
+        sdk.AlwaysOnSampler().shouldSample(testContext, traceId, testSpan.name, api.SpanKind.internal, [], []);
 
     expect(result.decision, equals(sdk.Decision.recordAndSample));
     expect(result.spanAttributes, equals([]));
@@ -34,20 +32,18 @@ void main() {
     final traceId = api.TraceId([1, 2, 3]);
     final testSpan = Span(
         'foo',
-        sdk.SpanContext(traceId, api.SpanId([7, 8, 9]), api.TraceFlags.none,
-            sdk.TraceState.empty()),
+        sdk.SpanContext(traceId, api.SpanId([7, 8, 9]), api.TraceFlags.none, sdk.TraceState.empty()),
         api.SpanId([4, 5, 6]),
         [],
         sdk.DateTimeTimeProvider(),
         sdk.Resource([]),
-        sdk.InstrumentationLibrary(
-            'always_on_sampler_test', 'sampler_test_version'));
+        sdk.InstrumentationLibrary('always_on_sampler_test', 'sampler_test_version'));
 
-    final result = sdk.AlwaysOnSampler().shouldSample(api.Context.root, traceId,
-        testSpan.name, api.SpanKind.internal, [], []);
+    final result =
+        sdk.AlwaysOnSampler().shouldSample(api.Context.root, traceId, testSpan.name, api.SpanKind.internal, [], []);
 
     expect(result.decision, equals(sdk.Decision.recordAndSample));
     expect(result.spanAttributes, equals([]));
-    expect(result.traceState.isEmpty, isTrue);
+    expect(result.traceState == null, isTrue);
   });
 }

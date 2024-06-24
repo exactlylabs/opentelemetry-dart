@@ -24,14 +24,14 @@ class WebTracerProvider extends sdk.TracerProviderBase {
   final api.IdGenerator _idGenerator;
   final sdk.SpanLimits _spanLimits;
 
-  WebTracerProvider(
-      {List<api.SpanProcessor> processors,
-      sdk.Resource resource,
-      sdk.Sampler sampler,
-      sdk.TimeProvider timeProvider,
-      api.IdGenerator idGenerator,
-      sdk.SpanLimits spanLimits})
-      :
+  WebTracerProvider({
+    List<api.SpanProcessor>? processors,
+    sdk.Resource? resource,
+    sdk.Sampler? sampler,
+    sdk.TimeProvider? timeProvider,
+    api.IdGenerator? idGenerator,
+    sdk.SpanLimits? spanLimits,
+  })  :
         // Default to a no-op TracerProvider.
         _processors = processors ?? [],
         _resource = resource ?? sdk.Resource([]),
@@ -50,8 +50,8 @@ class WebTracerProvider extends sdk.TracerProviderBase {
   api.Tracer getTracer(String name, {String version = ''}) {
     return _tracers.putIfAbsent(
         '$name@$version',
-        () => Tracer(_processors, _resource, _sampler, _timeProvider,
-            _idGenerator, sdk.InstrumentationLibrary(name, version),
+        () => Tracer(
+            _processors, _resource, _sampler, _timeProvider, _idGenerator, sdk.InstrumentationLibrary(name, version),
             spanLimits: _spanLimits));
   }
 }

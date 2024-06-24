@@ -10,10 +10,8 @@ class TraceState implements api.TraceState {
   static const int _MAX_KEY_VALUE_PAIRS = 32;
   static const int _KEY_MAX_SIZE = 256;
   static const int _VALUE_MAX_SIZE = 256;
-  static final RegExp validKeyRegex = RegExp(
-      r'^[a-z][\w\-\*\/]{0,255}$|^[a-z0-9][\w\-\*\/]{0,239}\@[\w\-\*\/]{0,13}$');
-  static final RegExp validValueRegex = RegExp(
-      r'^[\w\"\@\#\$\%\^\&\*\(\)\+\-\.\/\:\;\<\>\?\[\]\\\`\{\|\}]{1,256}$');
+  static final RegExp validKeyRegex = RegExp(r'^[a-z][\w\-\*\/]{0,255}$|^[a-z0-9][\w\-\*\/]{0,239}\@[\w\-\*\/]{0,13}$');
+  static final RegExp validValueRegex = RegExp(r'^[\w\"\@\#\$\%\^\&\*\(\)\+\-\.\/\:\;\<\>\?\[\]\\\`\{\|\}]{1,256}$');
   final Map<String, String> _state = {};
 
   TraceState.empty();
@@ -49,7 +47,7 @@ class TraceState implements api.TraceState {
   /// multi-tenant vendor format, then the first character may additionally
   /// be numeric.
   static bool _isValidKey(String key) {
-    if (key == null || key.length > _KEY_MAX_SIZE || key.isEmpty) {
+    if (key.length > _KEY_MAX_SIZE || key.isEmpty) {
       return false;
     }
 
@@ -63,7 +61,7 @@ class TraceState implements api.TraceState {
   /// Value an is opaque string up to 256 characters printable ASCII RFC0020
   /// characters (i.e., the range 0x20 to 0x7E) except comma , and =.
   static bool _isValidValue(String value) {
-    if (value == null || value.length > _VALUE_MAX_SIZE || value.isEmpty) {
+    if (value.length > _VALUE_MAX_SIZE || value.isEmpty) {
       return false;
     }
 
@@ -73,7 +71,12 @@ class TraceState implements api.TraceState {
   }
 
   @override
-  String get(String key) => _state[key];
+  String get(String key) {
+    if (!_state.containsKey(key)) {
+      throw ArgumentError('Key $key does not exist in TraceState');
+    }
+    return _state[key]!;
+  }
 
   /// Adds a key value pair to the TraceState.
   ///
@@ -90,9 +93,7 @@ class TraceState implements api.TraceState {
   /// characters (i.e., the range 0x20 to 0x7E) except comma , and =.
   @override
   void put(String key, String value) {
-    if (_isValidKey(key) &&
-        _isValidValue(value) &&
-        size < _MAX_KEY_VALUE_PAIRS) {
+    if (_isValidKey(key) && _isValidValue(value) && size < _MAX_KEY_VALUE_PAIRS) {
       _state[key] = value;
     }
   }

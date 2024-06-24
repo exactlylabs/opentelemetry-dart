@@ -9,14 +9,8 @@ class AlwaysOnSampler implements sdk.Sampler {
   String get description => 'AlwaysOnSampler';
 
   @override
-  sdk.SamplingResult shouldSample(
-      api.Context context,
-      api.TraceId traceId,
-      String spanName,
-      api.SpanKind spanKind,
-      List<api.Attribute> spanAttributes,
-      List<api.SpanLink> spanLinks) {
-    return sdk.SamplingResult(sdk.Decision.recordAndSample, spanAttributes,
-        context.spanContext?.traceState ?? sdk.TraceState.empty());
+  sdk.SamplingResult shouldSample(api.Context context, api.TraceId traceId, String spanName,
+      [api.SpanKind? spanKind, List<api.Attribute>? spanAttributes, List<api.SpanLink>? spanLinks]) {
+    return sdk.SamplingResult(sdk.Decision.recordAndSample, spanAttributes, context.spanContext?.traceState);
   }
 }

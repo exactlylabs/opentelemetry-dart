@@ -12,16 +12,16 @@ class BatchSpanProcessor implements api.SpanProcessor {
   final _log = Logger('opentelemetry.BatchSpanProcessor');
 
   final api.SpanExporter _exporter;
-  bool _isShutdown = false;
   final List<api.Span> _spanBuffer = [];
-  Timer _timer;
 
+  var _isShutdown = false;
+  final _maxQueueSize = 2048;
+
+  Timer? _timer;
   int _maxExportBatchSize = 512;
-  final int _maxQueueSize = 2048;
   int _scheduledDelayMillis = 5000;
 
-  BatchSpanProcessor(this._exporter,
-      {int maxExportBatchSize, int scheduledDelayMillis}) {
+  BatchSpanProcessor(this._exporter, {int? maxExportBatchSize, int? scheduledDelayMillis}) {
     if (maxExportBatchSize != null) {
       _maxExportBatchSize = maxExportBatchSize;
     }
@@ -50,7 +50,9 @@ class BatchSpanProcessor implements api.SpanProcessor {
   }
 
   @override
-  void onStart(api.Span span, api.Context parentContext) {}
+  void onStart(api.Span span, api.Context? parentContext) {
+    // No-op.
+  }
 
   @override
   void shutdown() {
@@ -63,8 +65,7 @@ class BatchSpanProcessor implements api.SpanProcessor {
   void _addToBuffer(api.Span span) {
     if (_spanBuffer.length >= _maxQueueSize) {
       // Buffer is full, drop span.
-      _log.warning(
-          'Max queue size exceeded. Dropping ${_spanBuffer.length} spans.');
+      _log.warning('Max queue size exceeded. Dropping ${_spanBuffer.length} spans.');
       return;
     }
 
@@ -93,7 +94,7 @@ class BatchSpanProcessor implements api.SpanProcessor {
       return;
     }
 
-    _timer.cancel();
+    _timer!.cancel();
     _timer = null;
   }
 

@@ -54,8 +54,7 @@ class SemanticAttributes {
 
   /// The size of the uncompressed request payload body after transport decoding. Not set if
   /// transport encoding not used.
-  static const String httpRequestContentLengthUncompressed =
-      'http.request_content_length_uncompressed';
+  static const String httpRequestContentLengthUncompressed = 'http.request_content_length_uncompressed';
 
   /// The size of the response payload body in bytes.
   ///
@@ -63,13 +62,11 @@ class SemanticAttributes {
   /// excluding headers and is often, but not always, present as the
   /// [Content-Length](https://tools.ietf.org/html/rfc7230#section-3.3.2) header. For requests using
   /// transport encoding, this should be the compressed size.
-  static const String httpResponseContentLength =
-      'http.response_content_length';
+  static const String httpResponseContentLength = 'http.response_content_length';
 
   /// The size of the uncompressed response payload body after transport decoding. Not set if
   /// transport encoding not used.
-  static const String httpResponseContentLengthUncompressed =
-      'http.response_content_length_uncompressed';
+  static const String httpResponseContentLengthUncompressed = 'http.response_content_length_uncompressed';
 
   /// The primary server name of the matched virtual host.
   static const String httpServerName = 'http.server_name';
@@ -112,12 +109,10 @@ class SemanticAttributes {
   /// The (uncompressed) size of the message payload in bytes. Also use this
   /// attribute if it is unknown whether the compressed or uncompressed payload
   /// size is reported.
-  static const String messagingMessagePayloadSizeBytes =
-      'messaging.message_payload_size_bytes';
+  static const String messagingMessagePayloadSizeBytes = 'messaging.message_payload_size_bytes';
 
   /// The compressed size of the message payload in bytes.
-  static const String messagingMessagePayloadCompressedSizeBytes =
-      'messaging.message_payload_compressed_size_bytes';
+  static const String messagingMessagePayloadCompressedSizeBytes = 'messaging.message_payload_compressed_size_bytes';
 }
 
 /// Attribute values for key [SemanticAttributes.messagingDestinationKind].

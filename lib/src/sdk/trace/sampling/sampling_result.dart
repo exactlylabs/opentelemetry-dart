@@ -11,8 +11,8 @@ enum Decision {
 
 class SamplingResult {
   final Decision decision;
-  final List<api.Attribute> spanAttributes;
-  final api.TraceState traceState;
+  final List<api.Attribute>? spanAttributes;
+  final api.TraceState? traceState;
 
   SamplingResult(this.decision, this.spanAttributes, this.traceState);
 }

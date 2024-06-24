@@ -8,15 +8,9 @@ import 'package:opentelemetry/src/sdk/trace/span.dart';
 import 'package:test/test.dart';
 
 void main() {
-  final testSpanContext = sdk.SpanContext(api.TraceId([1, 2, 3]),
-      api.SpanId([7, 8, 9]), api.TraceFlags.none, sdk.TraceState.empty());
-  final testSpan = Span(
-      'foo',
-      testSpanContext,
-      api.SpanId([4, 5, 6]),
-      [],
-      sdk.DateTimeTimeProvider(),
-      sdk.Resource([]),
+  final testSpanContext =
+      sdk.SpanContext(api.TraceId([1, 2, 3]), api.SpanId([7, 8, 9]), api.TraceFlags.none, sdk.TraceState.empty());
+  final testSpan = Span('foo', testSpanContext, api.SpanId([4, 5, 6]), [], sdk.DateTimeTimeProvider(), sdk.Resource([]),
       sdk.InstrumentationLibrary('library_name', 'library_version'));
 
   group('get Span', () {

@@ -13,7 +13,7 @@ import '../../../api.dart' as api;
 /// This class should not be exposed to consumers and is used internally to wrap
 /// [api.SpanContext] being injected or extracted for external calls.
 class NonRecordingSpan implements api.Span {
-  final api.SpanStatus _status = api.SpanStatus()..code = api.StatusCode.ok;
+  final api.SpanStatus _status = api.SpanStatus(api.StatusCode.ok);
   final api.SpanContext _spanContext;
 
   NonRecordingSpan(this._spanContext);
@@ -28,7 +28,7 @@ class NonRecordingSpan implements api.Span {
   void end() {}
 
   @override
-  Int64 get endTime => null;
+  Int64 get endTime => throw UnimplementedError();
 
   @override
   String get name => 'NON_RECORDING';
@@ -43,26 +43,25 @@ class NonRecordingSpan implements api.Span {
   api.SpanId get parentSpanId => api.SpanId.invalid();
 
   @override
-  void setStatus(api.StatusCode status, {String description}) {}
+  void setStatus(api.StatusCode code, String description) {}
 
   @override
   api.SpanContext get spanContext => _spanContext;
 
   @override
-  Int64 get startTime => null;
+  Int64 get startTime => throw UnimplementedError();
 
   @override
   api.SpanStatus get status => _status;
 
   @override
-  api.InstrumentationLibrary get instrumentationLibrary => null;
+  api.InstrumentationLibrary get instrumentationLibrary => throw UnimplementedError();
 
   @override
-  void recordException(dynamic exception, {StackTrace stackTrace}) {}
+  void recordException(dynamic exception, StackTrace stackTrace) {}
 
   @override
-  void addEvent(String name, Int64 timestamp,
-      {List<api.Attribute> attributes}) {}
+  void addEvent(String name, Int64 timestamp, {List<api.Attribute>? attributes}) {}
 
   @override
   api.SpanKind get kind => api.SpanKind.internal;

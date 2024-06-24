@@ -64,8 +64,7 @@ class Context {
   ///
   /// If [key] was already set in this context, it will be overridden. The rest
   /// of the context values will be inherited.
-  Context setValue(ContextKey key, Object value) =>
-      Context._(_zone.fork(zoneValues: {key: value}));
+  Context setValue(ContextKey key, Object value) => Context._(_zone.fork(zoneValues: {key: value}));
 
   /// Returns a new [Context] created from this one with the given [api.Span]
   /// set.
@@ -76,11 +75,11 @@ class Context {
 
   /// Get the [api.Span] attached to this [Context], or null if no such
   /// [api.Span] exists.
-  api.Span get span => getValue(spanKey);
+  api.Span? get span => getValue<api.Span?>(spanKey);
 
   /// Get the [api.SpanContext] from this [Context], or null if no such
   /// [api.SpanContext] exists.
-  api.SpanContext get spanContext => getValue(spanKey)?.spanContext;
+  api.SpanContext? get spanContext => getValue<api.Span?>(spanKey)?.spanContext;
 }
 
 class ContextKey {
